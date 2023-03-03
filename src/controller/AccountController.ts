@@ -1,4 +1,5 @@
 import { Request, Response } from "express"
+import { AccountBusiness } from "../business/AccountBusiness"
 import { AccountDatabase } from "../database/AccountDatabase"
 import { Account } from "../models/Account"
 import { AccountDB } from "../types"
@@ -6,17 +7,19 @@ import { AccountDB } from "../types"
 export class AccountController {
     public getAccounts = async (req: Request, res: Response) => {
         try {
-            const accountDatabase = new AccountDatabase()
-            const accountsDB: AccountDB[] = await accountDatabase.findAccounts()
+            // const accountDatabase = new AccountDatabase()
+            // const accountsDB: AccountDB[] = await accountDatabase.findAccounts()
     
-            const accounts = accountsDB.map((accountDB) => new Account(
-                accountDB.id,
-                accountDB.balance,
-                accountDB.owner_id,
-                accountDB.created_at
-            ))
+            // const accounts = accountsDB.map((accountDB) => new Account(
+            //     accountDB.id,
+            //     accountDB.balance,
+            //     accountDB.owner_id,
+            //     accountDB.created_at
+            // ))
+            const accountBusiness = new AccountBusiness();
+            const output = await accountBusiness.getAccounts()
     
-            res.status(200).send(accounts)
+            res.status(200).send(output)
         } catch (error) {
             console.log(error)
     
@@ -72,42 +75,50 @@ export class AccountController {
     public createAccount = async (req: Request, res: Response) => {
         try {
             const { id, ownerId } = req.body
-    
-            if (typeof id !== "string") {
-                res.status(400)
-                throw new Error("'id' deve ser string")
-            }
-    
-            if (typeof ownerId !== "string") {
-                res.status(400)
-                throw new Error("'ownerId' deve ser string")
-            }
-    
-            const accountDatabase = new AccountDatabase()
-            const accountDBExists = await accountDatabase.findAccountById(id)
-    
-            if (accountDBExists) {
-                res.status(400)
-                throw new Error("'id' já existe")
-            }
-    
-            const newAccount = new Account(
+
+            const input ={
                 id,
-                0,
-                ownerId,
-                new Date().toISOString()
-            )
-    
-            const newAccountDB: AccountDB = {
-                id: newAccount.getId(),
-                balance: newAccount.getBalance(),
-                owner_id: newAccount.getOwnerId(),
-                created_at: newAccount.getCreatedAt()
+                ownerId
             }
+
+            const accountBusiness = new AccountBusiness();
+            const output = await accountBusiness.createAccount(input)    
+
+            // if (typeof id !== "string") {
+            //     res.status(400)
+            //     throw new Error("'id' deve ser string")
+            // }
     
-            await accountDatabase.insertAccount(newAccountDB)
+            // if (typeof ownerId !== "string") {
+            //     res.status(400)
+            //     throw new Error("'ownerId' deve ser string")
+            // }
     
-            res.status(201).send(newAccount)
+            // const accountDatabase = new AccountDatabase()
+            // const accountDBExists = await accountDatabase.findAccountById(id)
+    
+            // if (accountDBExists) {
+            //     res.status(400)
+            //     throw new Error("'id' já existe")
+            // }
+    
+            // const newAccount = new Account(
+            //     id,
+            //     0,
+            //     ownerId,
+            //     new Date().toISOString()
+            // )
+    
+            // const newAccountDB: AccountDB = {
+            //     id: newAccount.getId(),
+            //     balance: newAccount.getBalance(),
+            //     owner_id: newAccount.getOwnerId(),
+            //     created_at: newAccount.getCreatedAt()
+            // }
+    
+            // await accountDatabase.insertAccount(newAccountDB)
+    
+            res.status(201).send(output)
         } catch (error) {
             console.log(error)
     
